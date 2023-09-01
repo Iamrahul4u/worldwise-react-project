@@ -1,26 +1,28 @@
-import { useCities } from '../Contexts/ProviderCities';
-import CountryItem from './CountryItem'
-import styles from './CountryList.module.css'
-import Spinner from './Spinner'
+import { useGeoLocation } from "../contexts/GeolocationProvider";
+import CountryItem from "./CountryItem";
+import styles from "./CountryList.module.css";
+import Message from "./Message";
+import Spinner from "./Spinner";
 
 function CountryList() {
-    const { cities, isLoading } = useCities();
-
-    if (isLoading) <Spinner />
-
-    const countries = cities.reduce((arr, city) => {
-        if (!arr.map((el) => el.country).includes(city.country))
-            return [...arr, { country: city.country, emoji: city.emoji }];
-        else return arr;
-    }, []);
+  const { cities, isLoading } = useGeoLocation();
+  if (isLoading) return <Spinner />;
+  if (!cities.length)
     return (
-        <ul className={styles.countryList}>
-            {countries.map((country) =>
-                <CountryItem country={country} key={cities.cityName} />
-            )
-            }
-        </ul>
-    )
+      <Message message="Start Adding Your cities By clicking on the Map" />
+    );
+  const countries = cities.reduce((arr, city) => {
+    if (!arr.map((el) => el.country).includes(city.country))
+      return [...arr, { country: city.country, emoji: city.emoji }];
+    else return arr;
+  }, []);
+  return (
+    <ul className={styles.countryList}>
+      {countries.map((country) => (
+        <CountryItem country={country} key={country.country} />
+      ))}
+    </ul>
+  );
 }
 
-export default CountryList
+export default CountryList;

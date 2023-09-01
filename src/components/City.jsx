@@ -1,8 +1,9 @@
 import { useNavigate, useParams } from "react-router-dom";
 import styles from "./City.module.css";
-import { useEffect } from "react";
-import { useCities } from "../Contexts/ProviderCities";
 import Button from "./Button";
+import { useGeoLocation } from "../contexts/GeolocationProvider";
+import { useEffect } from "react";
+import Spinner from "./Spinner";
 
 const formatDate = (date) =>
   new Intl.DateTimeFormat("en", {
@@ -13,24 +14,22 @@ const formatDate = (date) =>
   }).format(new Date(date));
 
 function City() {
-  const navigate = useNavigate();
-  const { fetchCities, currentCity } = useCities();
   // TEMP DATA
-
   const { id } = useParams();
-  useEffect(() => {
-    fetchCities(id);
-  }, [id])
+  const { currentCity, getCity, isLoading } = useGeoLocation();
+  const navigate = useNavigate();
 
+  useEffect(() => {
+    getCity(id);
+  }, [id]);
+  if (isLoading) return <Spinner />;
   const { cityName, emoji, date, notes } = currentCity;
 
   return (
     <div className={styles.city}>
       <div className={styles.row}>
         <h6>City name</h6>
-        <h3>
-          <span>{emoji}</span> {cityName}
-        </h3>
+        <h3> {cityName}</h3>
       </div>
 
       <div className={styles.row}>
@@ -55,12 +54,11 @@ function City() {
           Check out {cityName} on Wikipedia &rarr;
         </a>
       </div>
-      <div className={styles.buttons}>
-        <Button type='back' onClick={(e) => {
-          e.preventDefault()
-          navigate(-1)
-        }
-        }>&larr; Back</Button>
+
+      <div>
+        <Button onClick={() => navigate(-1)} type="back">
+          Back{" "}
+        </Button>
       </div>
     </div>
   );
